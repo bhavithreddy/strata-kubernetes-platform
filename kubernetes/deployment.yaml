@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform-demo
+  namespace: platform-demo
+  labels:
+    app: platform-demo
+  
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: platform-demo
+  template:
+    metadata:
+      labels:
+        app: platform-demo
+    spec:
+        topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: platform-demo
+        containers:
+        - name: platform-demo
+          image: platform-demo:1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: APP_NAME
+              value: platform-demo
+            - name: APP_VERSION
+              value: "1.0.0"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 128Mi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            failureThreshold: 15
+            periodSeconds: 2
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
