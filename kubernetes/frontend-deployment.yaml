@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: platform-frontend
+  namespace: platform-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: platform-frontend
+  template:
+    metadata:
+      labels:
+        app: platform-frontend
+        role: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: platform-frontend:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 64Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 101
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: platform-frontend
+  namespace: platform-demo
+spec:
+  type: ClusterIP
+  selector:
+    app: platform-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

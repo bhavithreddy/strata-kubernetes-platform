@@ -1,0 +1,43 @@
+# Secrets and local certificates
+certs/
+*.key
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+
+# Editors
+.vscode/
+.idea/
+
+# Environment and local configuration
+*.env
+!.env.example
+*.secret.yaml
+*.secret.yml
+secrets/
+kubeconfig
+kubeconfig.*
+
+# Python tooling
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Build and generated files
+*.log
+*.tmp
+.DS_Store
+
+# Backup files
+*.bak

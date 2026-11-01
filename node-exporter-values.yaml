@@ -1,0 +1,24 @@
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 9100
+  targetPort: 9100
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "9100"
+    prometheus.io/path: "/metrics"
+
+hostRootFsMount:
+  enabled: true
+
+tolerations:
+  - effect: NoSchedule
+    operator: Exists

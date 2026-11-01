@@ -1,0 +1,56 @@
+adminUser: admin
+
+admin:
+  existingSecret: strata-grafana-admin
+  userKey: admin-user
+  passwordKey: admin-password
+
+replicas: 1
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 80
+
+persistence:
+  type: pvc
+  enabled: true
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  size: 2Gi
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 150Mi
+  limits:
+    cpu: 300m
+    memory: 400Mi
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://strata-prometheus-server.monitoring.svc.cluster.local
+        isDefault: true
+        editable: true
+
+initChownData:
+  enabled: false
+
+grafana.ini:
+  smtp:
+    enabled: true
+    host: smtp.gmail.com:587
+    from_address: yeltibhavithreddy@gmail.com
+    from_name: Strata Grafana
+    startTLS_policy: MandatoryStartTLS
+
+smtp:
+  existingSecret: strata-grafana-smtp
+  userKey: user
+  passwordKey: password

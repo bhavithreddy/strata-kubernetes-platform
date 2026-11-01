@@ -1,0 +1,56 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: platform-demo-default-deny-ingress
+  namespace: platform-demo
+spec:
+  podSelector:
+    matchLabels:
+      app: platform-demo
+  policyTypes:
+    - Ingress
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend-to-platform-demo
+  namespace: platform-demo
+spec:
+  podSelector:
+    matchLabels:
+      app: platform-demo
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            role: frontend
+      ports:
+        - protocol: TCP
+          port: 8080
+
+
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-traefik-to-platform-demo
+  namespace: platform-demo
+spec:
+  podSelector:
+    matchLabels:
+      app: platform-demo
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: traefik
+      ports:
+        - protocol: TCP
+          port: 8080
