@@ -15,8 +15,15 @@ from app import main
 @pytest.fixture
 def client(monkeypatch):
     monkeypatch.setattr(main, "KUBERNETES_CONFIGURED", True)
-    return TestClient(main.app)
 
+    # Keep rollout API tests independent of a live Kubernetes cluster.
+    monkeypatch.setattr(
+        main,
+        "get_image_pull_failures",
+        lambda deployment: [],
+    )
+
+    return TestClient(main.app)
 
 @pytest.fixture
 def deployment():
