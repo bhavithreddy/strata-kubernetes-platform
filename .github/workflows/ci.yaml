@@ -10,7 +10,7 @@ on:
 
 permissions:
   contents: read
-  packages: write
+  id-token: write
 
 jobs:
   secret-scan:
@@ -162,9 +162,28 @@ jobs:
           registry: docker.io
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+
+
       - name: Publish image to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        id: publish
         env:
           IMAGE: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/strata-${{ matrix.image }}:${{ github.sha }}
-        run: docker push "$IMAGE"
+        run: |
+          docker push "$IMAGE"
+          DIGEST=$(docker image inspect "$IMAGE" \
+            --format='{{index .RepoDigests 0}}' | cut -d '@' -f 2)
+          echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
 
+      - name: Install Cosign
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: sigstore/cosign-installer@v3.9.2
+
+      - name: Sign container image with Cosign
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        env:
+          IMAGE: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/strata-${{ matrix.image }}
+          DIGEST: ${{ steps.publish.outputs.digest }}
+        run: |
+          cosign sign --yes "${IMAGE}@${DIGEST}"
