@@ -1,0 +1,33 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - kubernetes/backend-deployment.yaml
+  - kubernetes/deployment.yaml
+  - kubernetes/frontend-deployment.yaml
+  - kubernetes/service.yaml
+  - kubernetes/ingress.yaml
+  - kubernetes/hpa.yaml
+  - kubernetes/network-policies.yaml
+  - kubernetes/backend-network-policy.yaml
+  - kubernetes/backend-rbac.yaml
+  - kubernetes/rbac.yaml
+
+images:
+  - name: platform-api
+    newName: docker.io/ybhavithr/strata-backend
+    newTag: 6668ea184c807519f2fbd83b0922e9938f1cd154
+  - name: platform-demo
+    newName: docker.io/ybhavithr/strata-demo
+    newTag: 6668ea184c807519f2fbd83b0922e9938f1cd154
+  - name: platform-frontend
+    newName: docker.io/ybhavithr/strata-frontend
+    newTag: 6668ea184c807519f2fbd83b0922e9938f1cd154
+
+patches:
+  - path: gitops/patches/remove-hpa-managed-replicas.yaml
+    target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: platform-demo
