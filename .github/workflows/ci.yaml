@@ -1,4 +1,3 @@
-
 name: Strata DevSecOps CI
 
 on:
@@ -11,6 +10,11 @@ on:
 permissions:
   contents: read
   id-token: write
+
+concurrency:
+  group: strata-ci-${{ github.ref }}
+  cancel-in-progress: false
+
 
 jobs:
   secret-scan:
@@ -187,3 +191,46 @@ jobs:
           DIGEST: ${{ steps.publish.outputs.digest }}
         run: |
           cosign sign --yes "${IMAGE}@${DIGEST}"
+
+
+  update-gitops:
+    name: Update GitOps Image Tags
+    needs: [container-security]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Install Kustomize
+        uses: imranismail/setup-kustomize@v2
+
+      - name: Update image tags
+        run: |
+          kustomize edit set image \
+            platform-api=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/strata-backend:${GITHUB_SHA} \
+            platform-demo=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/strata-demo:${GITHUB_SHA} \
+            platform-frontend=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/strata-frontend:${GITHUB_SHA}
+
+
+      - name: Commit and push GitOps changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add kustomization.yaml
+
+          if git diff --cached --quiet; then
+            echo "No GitOps changes to commit."
+            exit 0
+          fi
+
+          git commit -m "chore(gitops): update images to ${GITHUB_SHA}"
+          git push origin HEAD:master
