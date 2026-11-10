@@ -16,13 +16,13 @@ resources:
 images:
 - name: platform-api
   newName: docker.io/ybhavithr/strata-backend
-  newTag: 8dfe9e6a4744a90218fcdbc6717b8fdf38e0e3c4
+  newTag: 1370f052bfd936fafe3822d55148fc89bcf94ba7
 - name: platform-demo
   newName: docker.io/ybhavithr/strata-demo
-  newTag: 8dfe9e6a4744a90218fcdbc6717b8fdf38e0e3c4
+  newTag: 1370f052bfd936fafe3822d55148fc89bcf94ba7
 - name: platform-frontend
   newName: docker.io/ybhavithr/strata-frontend
-  newTag: 8dfe9e6a4744a90218fcdbc6717b8fdf38e0e3c4
+  newTag: 1370f052bfd936fafe3822d55148fc89bcf94ba7
 
 patches:
 - path: gitops/patches/remove-hpa-managed-replicas.yaml
