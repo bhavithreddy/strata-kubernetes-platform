@@ -34,7 +34,7 @@ spec:
             - name: APP_NAME
               value: platform-demo
             - name: APP_VERSION
-              value: "1.0.0"
+              value: "1.0.1"
           resources:
             requests:
               cpu: 50m
